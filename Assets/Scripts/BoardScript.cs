@@ -1,11 +1,11 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BoardScript : MonoBehaviour
 {
     public float Sensitivity = 0.1f;
-    public float MaxSpeed = 10;
+    public Transform FloorTile;
 
     private Vector3 _previousMousePosition = new Vector3(0, 0, 0);
     private Vector3 _rotation = new Vector3(0, 0, 0);
@@ -16,6 +16,18 @@ public class BoardScript : MonoBehaviour
     {
         _previousMousePosition = Input.mousePosition;
         _rigidBody = transform.GetComponent<Rigidbody>();
+
+        var r = new System.Random();
+        for(var x = 0; x < 10; x++)
+        {
+            for(var z = 0; z < 10; z++)
+            {
+                if(r.Next(100) < 95)
+                {
+                    GameObject.Instantiate(FloorTile, new Vector3(x - 4.5f, 0, z - 4.5f), Quaternion.identity);
+                }
+            }
+        }
     }
 
     // Update is called once per frame
