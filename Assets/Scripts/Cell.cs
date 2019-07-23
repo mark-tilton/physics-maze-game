@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Assets.Scripts
 {
     public class Cell
     {
         public int X { get; }
-        public int Y { get; }
+        public int Z { get; }
         public Dictionary<Direction, bool> Walls { get; }
+        public FloorType FloorType { get; set; }
 
         public Cell(int x, int y)
         {
             X = x;
-            Y = y;
+            Z = y;
             Walls = new Dictionary<Direction, bool>
             {
                 [Direction.Up] = true,

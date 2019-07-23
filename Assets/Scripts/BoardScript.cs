@@ -10,31 +10,21 @@ public class BoardScript : MonoBehaviour
     public Transform Wall;
     public float Width = 10;
     public float Height = 10;
-    public int CellCountX = 10;
-    public int CellCountZ = 10;
 
     private Vector3 _previousMousePosition = new Vector3(0, 0, 0);
     private Vector3 _rotation = new Vector3(0, 0, 0);
     private Rigidbody _rigidBody;
-    private Cell[,] _cells;
+    private Maze _maze;
 
     // Start is called before the first frame update
     void Start()
     {
         _previousMousePosition = Input.mousePosition;
         _rigidBody = transform.GetComponent<Rigidbody>();
-        
-        // Create cells
-        _cells = new Cell[CellCountX, CellCountZ];
-        for(var x = 0; x < CellCountX; x++)
-        {
-            for(var z = 0; z < CellCountZ; z++)
-            {
-                _cells[x, z] = new Cell(x, z);
-            }
-        }
-        //todo: Create maze
 
+        _maze = new Maze();
+        _maze.Generate();
+        
         CreateOuterWalls();
         CreateFloorTiles();
         CreateInnerWalls();
@@ -63,25 +53,29 @@ public class BoardScript : MonoBehaviour
 
     private void CreateFloorTiles()
     {
-        for (var x = 0; x < CellCountX; x++)
+        for (var x = 0; x < _maze.CellCountX; x++)
         {
-            for (var z = 0; z < CellCountZ; z++)
+            for (var z = 0; z < _maze.CellCountZ; z++)
             {
-                var tile = Instantiate(FloorTile, new Vector3(x - 4.5f, -FloorTile.localScale.y / 2, z - 4.5f), Quaternion.identity, transform);
-                tile.name = $"Floor Tile ({x}, {z})";
+                var cell = _maze.Cells[x, z];
+                if (cell.FloorType == FloorType.Solid)
+                {
+                    var tile = Instantiate(FloorTile, new Vector3(x - 4.5f, -FloorTile.localScale.y / 2, z - 4.5f), Quaternion.identity, transform);
+                    tile.name = $"Floor Tile ({x}, {z})";
+                }                
             }
         }
     }
 
     private void CreateInnerWalls()
     {
-        for (var x = 0; x < CellCountX; x++)
+        for (var x = 0; x < _maze.CellCountX; x++)
         {
-            for (var z = 0; z < CellCountZ; z++)
+            for (var z = 0; z < _maze.CellCountZ; z++)
             {
-                var cell = _cells[x, z];
+                var cell = _maze.Cells[x, z];
                 // Skip walls with a z index of CellCountZ - 1 to avoid creating walls that overlap with the outer walls.
-                if (cell.Walls[Direction.Up] && z < CellCountZ - 1)
+                if (cell.Walls[Direction.Up] && z < _maze.CellCountZ - 1)
                 {
                     var wall = Instantiate(Wall, new Vector3(x - 4.5f, Wall.localScale.y / 2, z - 4), Quaternion.identity, transform);
                     wall.name = $"Inner Wall ({x}, {z}) Up";
@@ -89,7 +83,7 @@ public class BoardScript : MonoBehaviour
                     wall.localScale = new Vector3(1, wall.localScale.y, wall.localScale.z);
                 }
                 // Skip walls with a x index of CellCountX - 1 to avoid creating walls that overlap with the outer walls.
-                if (cell.Walls[Direction.Right] && x < CellCountX - 1)
+                if (cell.Walls[Direction.Right] && x < _maze.CellCountX - 1)
                 {
                     var wall = Instantiate(Wall, new Vector3(x - 4f, Wall.localScale.y / 2, z - 4.5f), Quaternion.identity, transform);
                     wall.name = $"Inner Wall ({x}, {z}) Right";
@@ -99,7 +93,7 @@ public class BoardScript : MonoBehaviour
             }
         }
     }
-
+   
     // Update is called once per frame
     public void Update()
     {
@@ -107,6 +101,6 @@ public class BoardScript : MonoBehaviour
         _previousMousePosition = Input.mousePosition;
 
         _rotation += new Vector3(deltaMousePosition.y, 0, -deltaMousePosition.x);
-        //_rigidBody.MoveRotation(Quaternion.Euler(_rotation));
+        _rigidBody.MoveRotation(Quaternion.Euler(_rotation));
     }
 }
